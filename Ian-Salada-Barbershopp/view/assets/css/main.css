@@ -1661,10 +1661,24 @@ input, select, textarea {
 		}
 
 		.calendar {
-			max-width: 400px;
+			width: 420px;
+			margin: 0 auto;
 			padding: 10px;
 			border-radius: 5px;
-			line-height: 1.6;
+		}
+
+		#calendar-table td {
+			padding: 5px;
+		}
+
+		.div-calendar {
+			display: flex;
+    		flex-direction: column;
+		}
+
+		.div-calendar-superior{
+			display: flex;
+			flex-direction: row;
 		}
 		
 
@@ -1726,7 +1740,7 @@ input, select, textarea {
 
         @media (max-width: 767px) {
             .calendar {
-                width: 90%;
+                width: 100%;
             }
 
             th, td {
@@ -1748,8 +1762,85 @@ input, select, textarea {
             .nav-item button {
                 margin: 0;
             }
+
+			.div-calendar-superior{
+				display: flex;
+				flex-direction: column;
+			}
+
+			#calendar-table {
+				margin: 0;
+        	}
+
+			.div-horas{
+				display: flex;
+				flex-direction: row;
+				margin: 15px 0px;
+			}
+
         }
 
 		.img-iniciar-sesion {
 			margin-bottom: 20px;
+		}
+
+		.marquee-container {
+			overflow: hidden;
+			width: 100%; /* Ajusta el ancho del contenedor según sea necesario */
+		  }
+		  
+		  #bg {
+			width: 4608px;
+			white-space: nowrap; /* Evita que el contenido se rompa en varias líneas */
+			animation: marqueeAnimation 25s linear infinite;
+		  }
+		  
+		  @keyframes marqueeAnimation {
+			0% {
+			  transform: translateX(0%);
+			}
+			100% {
+			  transform: translateX(-65%);
+			}
+		  }
+
+		  .responsive-table {
+			max-height: 100%;
+		}
+
+		.btn-reservar{
+			margin-top: 20px;
+		}
+
+		.txt-reservar{
+			margin-top: 20px;
+		}
+
+		.div-horas{
+			display: flex;
+			flex-direction: column;
+			margin-left: 15px;
+		}
+		
+		.btn-calendar-right{
+			margin-right: 0;
+			display: flex;
+			align-items: center;
+		}
+		.btn-calendar-left{
+			display: flex;
+			align-items: center;
+		}
+
+		.btn-hora{
+			height: 35px !important;
+			width: 80px !important;
+			line-height: normal !important;
+			margin: 5px 5px;
+			padding: 0px !important;
+			font-size: 0.7rem !important;
+		}
+
+		.div-horas-mañana{
+			margin: 15px 0px;
 		}
