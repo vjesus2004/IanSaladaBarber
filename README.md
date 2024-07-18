@@ -1,2 +1,2 @@
 # IanSaladaBarberWeb
-Agenda web para barberia
+Agenda web para barberia (Aplicacion personalizada remunerada)
