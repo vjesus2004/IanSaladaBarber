@@ -949,8 +949,16 @@ input, select, textarea {
 				background-color: rgba(255, 255, 255, 0.075);
 			}
 
-		table td {
-			padding: 0.75em 0.75em;
+		.agenda-table td {
+			padding: 10px 15px;
+		}
+
+		.agenda-table td:last-child {
+			width: 10px;
+		}
+
+		.agenda-table th {
+			text-align: center;
 		}
 
 		table th {
@@ -1013,7 +1021,6 @@ input, select, textarea {
 		background-color: transparent;
 		border-radius: 4px;
 		border: 0;
-		box-shadow: inset 0 0 0 1px #ffffff;
 		color: #ffffff !important;
 		cursor: pointer;
 		display: inline-block;
@@ -1130,7 +1137,7 @@ input, select, textarea {
 			height: 100%;
 		}
 
-		#bg:before {
+		#bg:before {	
 			-moz-transition: background-color 2.5s ease-in-out;
 			-webkit-transition: background-color 2.5s ease-in-out;
 			-ms-transition: background-color 2.5s ease-in-out;
@@ -1139,14 +1146,6 @@ input, select, textarea {
 			-webkit-transition-delay: 0.75s;
 			-ms-transition-delay: 0.75s;
 			transition-delay: 0.75s;
-			background-image: linear-gradient(to top, rgba(19, 21, 25, 0.5), rgba(19, 21, 25, 0.5)), url("../../images/overlay.png");
-			background-size: auto,
- 256px 256px;
-			background-position: center,
- center;
-			background-repeat: no-repeat,
- repeat;
-			z-index: 2;
 		}
 
 		#bg:after {
@@ -1457,6 +1456,7 @@ input, select, textarea {
 			#header .content p {
 				line-height: 1.875;
 			}
+			
 
 		}
 
@@ -1496,6 +1496,10 @@ input, select, textarea {
 						}
 
 				#header nav.use-middle:after {
+					display: none;
+				}
+
+				.mapa {
 					display: none;
 				}
 
@@ -1613,6 +1617,11 @@ input, select, textarea {
 					background-size: 14px 14px;
 				}
 
+
+		#mapa {
+			width: 340px;
+		}
+
 		}
 
 		@media screen and (max-width: 480px) {
@@ -1675,11 +1684,6 @@ input, select, textarea {
 			display: flex;
     		flex-direction: column;
 		}
-
-		.div-calendar-superior{
-			display: flex;
-			flex-direction: row;
-		}
 		
 
         .style-button {
@@ -1738,7 +1742,7 @@ input, select, textarea {
             cursor: pointer;
         }
 
-        @media (max-width: 767px) {
+        @media (max-width: 480px) {
             .calendar {
                 width: 100%;
             }
@@ -1772,17 +1776,29 @@ input, select, textarea {
 				margin: 0;
         	}
 
-			.div-horas{
-				display: flex;
-				flex-direction: row;
-				margin: 15px 0px;
+			.table-container {
+				overflow-x: auto; /* Habilita la barra de desplazamiento horizontal cuando sea necesario */
+				max-width: 100%; /* Limita el ancho del contenedor para que no exceda el ancho del viewport */
 			}
+
+			.agenda-table {
+				overflow-x: auto; /* Agregar barra de desplazamiento horizontal */
+				-webkit-overflow-scrolling: touch; /* Propiedad específica de iOS para un desplazamiento suave */
+				display: block;
+				height: 500px;
+			  }
+
+			  .agenda-table td{
+				padding: 10px 7px;
+			  }
 
         }
 
 		.img-iniciar-sesion {
 			margin-bottom: 20px;
 		}
+		
+		
 
 		.marquee-container {
 			overflow: hidden;
@@ -1808,8 +1824,9 @@ input, select, textarea {
 			max-height: 100%;
 		}
 
-		.btn-reservar{
-			margin-top: 20px;
+		.div-btn-consultar{
+			display: flex;
+			justify-content: center;
 		}
 
 		.txt-reservar{
@@ -1839,8 +1856,198 @@ input, select, textarea {
 			margin: 5px 5px;
 			padding: 0px !important;
 			font-size: 0.7rem !important;
+			box-shadow: inset 0 0 0 1px #ffffff;
 		}
 
-		.div-horas-mañana{
-			margin: 15px 0px;
+		.btn-reservar{
+			display: none;
 		}
+		
+		#work button, input{
+			box-shadow: inset 0 0 0 1px #ffffff;
+		}
+
+		.div-calendar-superior{
+			display: flex;
+			flex-direction: column;
+		}
+
+		.div-horas-disponibles{
+			display: flex;
+    		flex-direction: column;
+			margin: 15px 0px;
+			align-items: center;
+		}
+
+		.selected {
+			background-color: #887b40;
+		}
+		
+		.agenda-table {
+			margin-top: 30px;
+			width: 100%;
+			overflow-x: auto;
+		}
+
+		#work {
+            width:auto !important;
+        }
+
+		#work button {
+			font-size: 0.5rem;
+			padding: 0px 10px;
+		}
+
+		/* Modal Styles */
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 1;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			overflow: auto;
+			background-color: rgba(27, 31, 34, 0.85);;
+		}
+		
+		.modal-content {
+			background-color: rgba(16, 19, 20, 0.85);;
+			margin: auto;
+			padding: 20px;
+			border: 1px solid #888;
+			width: 80%;
+			max-width: 600px; /* Definir un ancho máximo para el modal */
+			position: fixed;
+			top: 25%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 9999;
+		}
+		
+		.close {
+			color: #aaaaaa;
+			float: right;
+			font-size: 28px;
+			font-weight: bold;
+		}
+		
+		.close:hover,
+		.close:focus {
+			color: #000;
+			text-decoration: none;
+			cursor: pointer;
+		}
+
+		.modal {
+			display: none;
+		}
+		.cell-disabled {
+			background-color: black;
+			color: grey;
+            pointer-events: none; /* Deshabilita los clics en los domingos */
+		}
+		
+		.btn-lista{
+			display: flex !important;
+			border-radius: 0 !important;
+			width: 100%;
+			justify-content: center;
+		}
+
+		.div-conf-reserva {
+			display: -moz-flex;
+			display: -webkit-flex;
+			display: -ms-flex;
+			display: flex;
+			-moz-flex-direction: column;
+			-webkit-flex-direction: column;
+			-ms-flex-direction: column;
+			flex-direction: column;
+			-moz-align-items: center;
+			-webkit-align-items: center;
+			-ms-align-items: center;
+			align-items: center;
+			-moz-justify-content: space-between;
+			-webkit-justify-content: space-between;
+			-ms-justify-content: space-between;
+			justify-content: space-between;
+			position: relative;
+			min-height: 100vh;
+			width: 100%;
+			padding: 4rem 2rem;
+			z-index: 3;
+		}
+	
+		/* Estilo adicional opcional para ajustar el tamaño de la imagen */
+		#refresh img {
+			width: 100%; /* Para ajustar el tamaño de la imagen según el tamaño del botón */
+			height: auto; /* Para mantener la proporción de la imagen */
+		}
+
+		.botones-hora-container {
+			width: 50%; /* Ancho del 50% */
+			margin: 0 auto; /* Centrar el div horizontalmente */
+			display: flex; /* Utilizar flexbox para los botones */
+			flex-wrap: wrap; /* Permitir que los botones se envuelvan cuando el espacio es insuficiente */
+			justify-content: center; /* Alinear los botones al centro por defecto */
+		}
+		
+		.btn-hora {
+			width: calc(50% - 10px); /* Ancho de cada botón alrededor del 50% del contenedor con margen */
+			margin: 5px; /* Espacio entre los botones */
+			box-sizing: border-box; /* Incluir el relleno y el borde en el ancho del botón */
+			/* Estilos adicionales según sea necesario */
+		}
+		
+		/* Estilos base */
+		.botones-hora-container {
+			width: 50%; /* Ancho del 50% */
+			margin: 0 auto; /* Centrar el div horizontalmente */
+			display: flex; /* Utilizar flexbox para los botones */
+			flex-wrap: wrap; /* Permitir que los botones se envuelvan cuando el espacio es insuficiente */
+			justify-content: center; /* Alinear los botones al principio */
+		}
+
+		.btn-hora {
+			width: calc(50% - 10px); /* Ancho de cada botón alrededor del 50% del contenedor con margen */
+			margin: 5px; /* Espacio entre los botones */
+			box-sizing: border-box; /* Incluir el relleno y el borde en el ancho del botón */
+			/* Estilos adicionales según sea necesario */
+		}
+
+		/* Consultas de medios para ajustar el ancho máximo según diferentes tamaños de pantalla */
+		@media only screen and (max-width: 425px) {
+			.botones-hora-container {
+				width: 100%; /* Ancho del 100% para pantallas con un ancho máximo de 425px */
+			}
+		}
+
+		@media only screen and (min-width: 426px) and (max-width: 552px) {
+			.botones-hora-container {
+				width: 80%; /* Ancho del 80% para pantallas con un ancho entre 426px y 552px */
+			}
+		}
+
+		@media only screen and (min-width: 553px) and (max-width: 736px) {
+			.botones-hora-container {
+				width: 70%; /* Ancho del 70% para pantallas con un ancho entre 553px y 736px */
+			}
+		}
+
+		@media only screen and (min-width: 737px) and (max-width: 1680px) {
+			.botones-hora-container {
+				width: 60%; /* Ancho del 60% para pantallas con un ancho entre 737px y 1680px */
+			}
+		}
+
+		@media only screen and (min-width: 1681px) {
+			.botones-hora-container {
+				width: 40%; /* Ancho del 40% para pantallas con un ancho mayor a 1680px */
+			}
+		}
+
+		
+		
+
+		

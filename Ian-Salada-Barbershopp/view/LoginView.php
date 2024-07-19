@@ -19,7 +19,7 @@
 							<article id="work">
 								<a class="close" href="../index.php">Close</a>
 								<h2 class="major">Iniciar Sesión</h2>
-								<form method="post" >
+								<form method="post" action="../controller/LoginController.php">
 									<div class="fields">
 										<div class="field">
 											<label for="user">Usuario</label>

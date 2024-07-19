@@ -1,15 +1,13 @@
 <?php
+
 session_start();
 
 $visible = "none"; // Valor por defecto
 $visiblelogin = "block"; // Valor por defecto
 
-if(isset($_SESSION["adm"]) && $_SESSION["adm"] == 1){
+if(isset($_SESSION['rol']) && $_SESSION['rol'] == 'admin') {
     $visible = "block";
-	$visiblelogin = "none";
-}else{
-	$visible = "none";
-	$visiblelogin = "block";
+    $visiblelogin = "none";
 }
 ?>
 
@@ -20,6 +18,7 @@ if(isset($_SESSION["adm"]) && $_SESSION["adm"] == 1){
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="view/assets/css/main.css" />
+		<link rel="icon" type="image/x-icon" href="view/images/logo01.png">
 		<noscript><link rel="stylesheet" href="view/assets/css/noscript.css" /></noscript>
 		<style>
 			.btn-agenda{
@@ -33,7 +32,25 @@ if(isset($_SESSION["adm"]) && $_SESSION["adm"] == 1){
 				display: <?php echo $visiblelogin; ?>;
 			}
 	
+			#calendar-table td:nth-child(7n) {
+            background-color: black;
+			color: grey;
+            pointer-events: none; /* Deshabilita los clics en los domingos */
+        }
+			.div-reserva{
+				display: none;
+			}
+			.color-i {
+			color: #a08360; /* Color para la letra "I" */
+		}
+		
+		.color-s {
+			color: #a08360; /* Color para la letra "S" */
+		}
 			</style>
+
+			
+			
 		
 	</head>
 	<body class="is-preload">
@@ -42,24 +59,26 @@ if(isset($_SESSION["adm"]) && $_SESSION["adm"] == 1){
 			<div id="wrapper">
 
 				<nav class="btn-iniciar-sesion" id="nav-user">
-					<span><a href="controller/LoginController.php"><img src="view/images/user-icon.png" class="img-iniciar-sesion" alt="Iniciar Sesión"></a></span>
+					<span><a href="view/LoginView.php"><img src="view/images/user-icon.png" class="img-iniciar-sesion" alt="Iniciar Sesión"></a></span>
 				</nav>
 				<!-- Header -->
 					<header id="header">
-						<div class="logo">
-							<span class="icon fa-gem"></span>
-						</div>
+					<div class="logo-container">
+ 					  <div class="white-circle">
+ 					    <img src="view/images/logo01.png" alt="Logo" class="logo" style="width: 180px; height: auto;">
+ 					  </div>
+ 					</div>
 						<div class="content">
 							<div class="inner">
-								<h1>IAN SALADA BARBER</h1>
+							<h1>IAN SALADA BARBER</h1>
 							</div>
 						</div>
 						<nav>
-						<form method="post"> 
+						<form method="post" action="controller/AgendaController.php"> 
 						<ul>
-						    <li><a href="#intro" >Reserva Online</a></li>
-						    <li class="btn-agenda"><a href="#work" >Ver agenda</a></li>
-						    <li><button class="btn-logout" name="btn-logout">CERRAR SESION</button></li>
+						    <li><input type="button" class="btn-lista" onclick="window.location.href = '#intro';" value="Reserva Online"></li>
+						    <li class="btn-agenda"><input type="button" class="btn-lista" onclick="window.location.href = '#work';" value="Ver agenda"></li>
+						    <li class="btn-logout"><input type="submit" class="btn-lista"  href="index.php" name="btn-logout" value="Cerrar sesión"></li>
 						</ul>
 						</form>
 						</nav>
@@ -93,6 +112,7 @@ if(isset($_SESSION["adm"]) && $_SESSION["adm"] == 1){
 												<table id="calendar-table" class="style-table responsive-table">
 													<thead>
 														<tr>
+															
 															<th>Lun</th>
 															<th>Mar</th>
 															<th>Mie</th>
@@ -106,87 +126,241 @@ if(isset($_SESSION["adm"]) && $_SESSION["adm"] == 1){
 												</table>
 											</div>
 										</div>
-										<div class="div-horas"><!-- Div derecho -->
-											<div class="div-horas-mañana">
-												<h4>Mañana</h4>
-												<input class="btn-hora" type="button" value="9:00">
-												<input class="btn-hora" type="button" value="10:00">
-												<input class="btn-hora" type="button" value="11:00">
-												<input class="btn-hora" type="button" value="12:00">
-											</div>
-											<div class="div-horas-tarde">
-												<h4>Tarde</h4>
-												<input class="btn-hora" type="button" value="14:00">
-												<input class="btn-hora" type="button" value="15:00">
-												<input class="btn-hora" type="button" value="16:00">
-												<input class="btn-hora" type="button" value="17:00">
-												<input class="btn-hora" type="button" value="18:00">
-												<input class="btn-hora" type="button" value="19:00">
-												<input class="btn-hora" type="button" value="20:00">
-												<input class="btn-hora" type="button" value="21:00">
-											</div>
-										</div>
-									</div>
-									<div> <!-- Div inferior -->
-									<form method="post">
-										<h4>Nombre</h4>
-										<input type="text">
-
-										<h4 class="txt-reservar">Teléfono</h4>
-										<input type="text">
-
-										<h4 class="txt-reservar">Nota (opcional)</h4>
-										<input type="text">
-
-										<input type="button" value="reservar" class="primary btn-reservar">
-									</form>
 										
+									    <div class="div-horas" id="horariosDiv"><!-- Div derecho -->
+										
+									         <div class="div-horas-disponibles" id="div-horas-disponibles">
+											</div>
+											
+									    </div>
 									</div>
 								</div>
+									    <div> <!-- Div inferior -->
+									
+										
+										<form method="POST" id="myForm" action="controller/AgendaController.php">
+										
+										<div id="divReserva" class="div-reserva">
+												<h4>Nombre (*)</h4>
+												<input type="text" name="nombre" maxlength="50" id="nombreForm" oninput="validarSoloLetras(this)">
+														
+												<h4 class="txt-reservar">Teléfono (*)</h4>
+												<input type="text" name="telefono" maxlength="9" id="telefonoForm" oninput="validarSoloNumeros(this)">
+														
+												<h4 class="txt-reservar">Nota (opcional)</h4>
+												<input type="text" name="nota">
+
+												
+												<input type="hidden" id="horaSeleccionada" name="horaSeleccionada" value="">
+												
+												<!-- El modal -->
+													<div id="confirmModal" class="modal">
+                                            	<div class="modal-content">
+												<p id="confirmationDetails">¿Esta seguro de reservar el turno?</p>
+                                            	    <button id="confirmButton" name="confirmar-reserva">Confirmar</button>
+                                            	    <button id="cancelButton" type="button">Cancelar</button>
+                                            	</div>
+                                        </div>
+
+										</form>
+											
+											</div>
+												<form>
+													<button id="btn-reservar" type="button" class="primary btn-reservar" onclick="mostrarModal1()">Reservar</button>
+												</form>				
+									    	</div>
+								
 
 							</article>
 
-						<!-- Work -->
 							<article id="work">
 								<h2 class="major">Agenda</h2>
+
+									<!-- Mostrar la fecha actual -->
+								<div class="agenda-date">
+									<p>Día: <?php echo $_SESSION["diaconsultaFORMAT"] ; ?></p>
+									<form style="width: 130vh; display:flex;">
+											<button type="button" id="prevDayButton" style="margin-right:15px">Día Anterior</button>
+											<button type="button" id="nextDayButton" style="margin-right:15px">Próximo Día</button>
+											<button type="button" id="refresh"><img src="view/images/refresh.png" style="display:flex;" alt="Actualizar"></button>
+									</form>
+								</div>
+
+								<div class="agenda-container">
+									<table class="agenda-table">
+								    <thead>
+								        <tr>
+								            <th>Nombre</th>
+								            <th>Teléfono</th>
+								            <th>Nota</th>
+								            <th>Hora</th>
+								            <th>Acción</th>
+								        </tr>
+								    </thead>
+								    <tbody>
+								        <?php
+								        // Mostrar reservas para la mañana si existen
+								        if (isset($_SESSION["agendaOpMañana"]) && !empty($_SESSION["agendaOpMañana"])) {
+								            // Encabezado para los horarios opcionales en la mañana
+								            ?>
+								            <tr>
+								                <td colspan="6">Horarios opcionales en la mañana</td>
+								            </tr>
+								            <?php
+								            foreach ($_SESSION["agendaOpMañana"] as $reservaMañana) {
+								                ?>
+								                <tr>
+								                    <td><?php echo $reservaMañana['nom']; ?></td>
+								                    <td><?php echo $reservaMañana['tel']; ?></td>
+								                    <td><?php echo $reservaMañana['nota']; ?></td>
+								                    <td><?php echo $reservaMañana['hora']; ?></td>
+								                    <td>
+															<button type="button" onclick="mostrarModalMostrar(); getHoraShow('<?php echo $reservaMañana['hora']; ?>')"><img src="view\images\mostrar.png" alt="Liberar horario"/></button>
+															<button type="button" onclick="mostrarModalBorrar(); getHoraDelete('<?php echo $reservaMañana['hora']; ?>')"><img src="view\images\borrar.png" alt="Eliminar Turno"/></button>
+								                    </td>
+								                </tr>
+								            <?php
+								            }
+								        }
+									
+								        // Mostrar reservas normales si existen
+								        if (isset($_SESSION["agenda"]) && !empty($_SESSION["agenda"])) {
+								            // Encabezado para los horarios por defecto
+								            ?>
+								            <tr>
+								                <td colspan="6">Horarios por defecto</td>
+								            </tr>
+								            <?php
+								            foreach ($_SESSION["agenda"] as $reserva) {
+								                ?>
+								                <tr>
+								                    <td><?php echo $reserva['nom']; ?></td>
+								                    <td><?php echo $reserva['tel']; ?></td>
+								                    <td><?php echo $reserva['nota']; ?></td>
+								                    <td><?php echo $reserva['hora']; ?></td>
+								                    <td>
+															<button type="button" onclick="mostrarModalOcultar(); getHoraHidde('<?php echo $reserva['hora']; ?>')"><img src="view\images\ocultar.png" alt="Ocultar horario"/></button>
+															<button type="button" onclick="mostrarModalBorrar(); getHoraDelete('<?php echo $reserva['hora']; ?>')"><img src="view\images\borrar.png" alt="Eliminar turno"/></button>
+								                    </td>
+								                </tr>
+								            <?php
+								            }
+								        }
+									
+										
+								        // Mostrar reservas para la tarde si existen
+								        if (isset($_SESSION["agendaOpTarde"]) && !empty($_SESSION["agendaOpTarde"])) {
+								            // Encabezado para los horarios opcionales de la tarde
+								            ?>
+								            <tr>
+								                <td colspan="6">Horarios opcionales de la tarde</td>
+								            </tr>
+								            <?php
+								            foreach ($_SESSION["agendaOpTarde"] as $reservaTarde) {
+								                ?>
+								                <tr>
+								                    <td><?php echo $reservaTarde['nom']; ?></td>
+								                    <td><?php echo $reservaTarde['tel']; ?></td>
+								                    <td><?php echo $reservaTarde['nota']; ?></td>
+								                    <td><?php echo $reservaTarde['hora']; ?></td>
+								                    <td>
+															<button type="button" onclick="mostrarModalMostrar(); getHoraShow('<?php echo $reservaTarde['hora']; ?>');"><img src="view\images\mostrar.png" alt="Liberar horario"/></button>
+															<button type="button" onclick="mostrarModalBorrar(); getHoraDelete('<?php echo $reservaTarde['hora']; ?>');" ><img src="view\images\borrar.png" alt="Eliminar turno"/></button>
+											
+								                    </td>
+
+													
+								                </tr>
+												
+								            <?php
+								            }
+								        }
+								        ?>
+										
+
+										<div id="confirmarBorrarModal" class="modal">
+											<div class="modal-content">
+												<div>
+													
+													<p>¿Esta seguro que desea eliminar el turno reservado?</p>
+												</div>
+												<div style="display:flex;">
+												<form>
+													<input type="hidden" id="hora-delete" value="">
+													<button id="btnConfirmarBorrar">Confirmar</button>
+													<button id="btnCancelarBorrar" type="button" style="margin-left: 15px">Cancelar</button>
+												</form>
+													
+												</div>
+											</div>
+                       					</div>
+
+										   <div id="confirmarMostrarModal" class="modal">
+												<div class="modal-content">
+													<div>
+														<p>¿Esta seguro que desea mostrar el turno?</p>
+													</div>
+													<div style="display:flex;">
+													<form>
+														<input type="hidden" id="hora-show" value="">
+														<button id="btnConfirmarMostrar">Confirmar</button>
+														<button id="btnCancelarMostrar" type="button" style="margin-left: 15px">Cancelar</button>
+													</form>
+														
+													</div>
+												</div>
+                       						</div>
+
+											<div id="confirmarOcultarModal" class="modal">
+												<div class="modal-content">
+													<div>
+														<p>¿Esta seguro que desea ocultar el turno?</p>
+													</div>
+													<div style="display:flex;">
+													<form>
+														<input type="hidden" id="hora-hidde" value="">
+														<button id="btnConfirmarOcultar">Confirmar</button>
+														<button id="btnCancelarOcultar" type="button" style="margin-left: 15px">Cancelar</button>
+													</form>
+														
+													</div>
+												</div>
+                       						</div>
+								    </tbody>
+								</table>
 								
+
+							</div>
+
 							</article>
+
+
 
 					</div>
 
 				<!-- Footer -->
 					<footer id="footer">
+
 					</footer>
 
 			</div>
 
-		<!-- BG -->
+		<!-- Marquesina -->
 		
 		<div class="marquee-container">
 			<div id="bg"></div>
 		</div>
 
 		<!-- Scripts -->
-			<script src="view/assets/js/jquery.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 			<script src="view/assets/js/browser.min.js"></script>
 			<script src="view/assets/js/breakpoints.min.js"></script>
 			<script src="view/assets/js/util.js"></script>
+			<script src="view/assets/js/popups.js"></script>
 			<script src="view/assets/js/main.js"></script>
 			<script src="view/assets/js/script-calendar.js"></script>
-			<script src="view/https://kit.fontawesome.com/3ee734fc3f.js" crossorigin="anonymous"></script>
-
-			<script>
-				document.addEventListener('DOMContentLoaded', function () {
-				  // Obtenemos el elemento #nav-user
-				  var navUser = document.getElementById('nav-user');
-				
-				  // Verificamos si #work está activo
-				  var workSection = document.getElementById('work');
-				  if (workSection.classList.contains('active')) {
-					// Si está activo, ocultamos #nav-user
-					navUser.style.display = 'none';
-				  }
-				});
-			</script>
+			<script src="view/assets/js/controlHoras.js"></script>
+			<script src="view/assets/js/validaciones.js"></script>
+			<script src="view/assets/js/solicitudesAJAX.js"></script>
 	</body>
 </html>
