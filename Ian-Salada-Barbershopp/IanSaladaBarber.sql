@@ -1,81 +1,112 @@
-CREATE DATABASE  IF NOT EXISTS `jesus` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `jesus`;
--- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
---
--- Host: localhost    Database: jesus
--- ------------------------------------------------------
--- Server version	8.0.31
+-- =========================================================
+-- Crear base de datos
+-- =========================================================
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+CREATE DATABASE IF NOT EXISTS `iansb_db`
+  DEFAULT CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
 
---
--- Table structure for table `adm`
---
+USE `iansb_db`;
+
+-- =========================================================
+-- Tabla de administradores
+-- =========================================================
 
 DROP TABLE IF EXISTS `adm`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+
 CREATE TABLE `adm` (
-  `usuario` varchar(50) NOT NULL,
-  `clave` text NOT NULL,
+  `usuario` VARCHAR(50) NOT NULL,
+  `clave`   TEXT NOT NULL,
   PRIMARY KEY (`usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `adm`
---
+INSERT INTO `adm` (`usuario`, `clave`)
+VALUES ('ian', 'ian');
 
-LOCK TABLES `adm` WRITE;
-/*!40000 ALTER TABLE `adm` DISABLE KEYS */;
-INSERT INTO `adm` VALUES ('ian','ian');
-/*!40000 ALTER TABLE `adm` ENABLE KEYS */;
-UNLOCK TABLES;
+-- =========================================================
+-- Tabla de servicios
+-- =========================================================
 
---
--- Table structure for table `agenda`
---
+DROP TABLE IF EXISTS `servicio`;
+
+CREATE TABLE `servicio` (
+  `id`               INT NOT NULL AUTO_INCREMENT,
+  `nombre`           VARCHAR(100) NOT NULL,
+  `descripcion`      VARCHAR(255) DEFAULT NULL,
+  `precio_base`      DECIMAL(10,2) NOT NULL,
+  `duracion_minutos` INT NOT NULL,
+  `activo`           TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+-- =========================================================
+-- Tabla de agenda (turnos)
+-- =========================================================
 
 DROP TABLE IF EXISTS `agenda`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+
 CREATE TABLE `agenda` (
-  `ID` int NOT NULL AUTO_INCREMENT,
-  `dia` date DEFAULT NULL,
-  `hora` varchar(5) DEFAULT NULL,
-  `nom` varchar(50) DEFAULT NULL,
-  `tel` int DEFAULT NULL,
-  `nota` varchar(200) DEFAULT NULL,
-  `opcional` tinyint(1) DEFAULT '0',
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `ID`        INT NOT NULL AUTO_INCREMENT,
+  `dia`       DATE DEFAULT NULL,
+  `hora`      VARCHAR(5) DEFAULT NULL,
+  `nom`       VARCHAR(50) DEFAULT NULL,
+  `tel`       INT DEFAULT NULL,
+  `nota`      VARCHAR(200) DEFAULT NULL,
+  `opcional`  TINYINT(1) DEFAULT '0',
 
---
--- Dumping data for table `agenda`
---
+  -- Datos de cliente y servicio
+  `email`                 VARCHAR(100) DEFAULT NULL,
+  `servicio_id`           INT DEFAULT NULL,
+  `precio`                DECIMAL(10,2) DEFAULT NULL,
 
-LOCK TABLES `agenda` WRITE;
-/*!40000 ALTER TABLE `agenda` DISABLE KEYS */;
-/*!40000 ALTER TABLE `agenda` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+  -- Estado del turno
+  `estado` ENUM('pendiente','confirmada','completada','cancelada','no_asistio')
+           NOT NULL DEFAULT 'pendiente',
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+  -- Mailer
+  `confirmacion_enviada`  TINYINT(1) NOT NULL DEFAULT 0,
+  `recordatorio_enviado`  TINYINT(1) NOT NULL DEFAULT 0,
+  `token_confirmacion`    VARCHAR(64) DEFAULT NULL,
+  `fecha_confirmacion`    DATETIME DEFAULT NULL,
 
--- Dump completed on 2024-04-25 17:34:19
+  -- Auditoría
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (`ID`),
+
+  CONSTRAINT `fk_agenda_servicio`
+    FOREIGN KEY (`servicio_id`)
+    REFERENCES `servicio`(`id`)
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+) ENGINE=InnoDB
+  AUTO_INCREMENT=1
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+-- =========================================================
+-- Tabla para carrusel de fondos
+-- =========================================================
+
+DROP TABLE IF EXISTS `fondo_carrusel`;
+
+CREATE TABLE `fondo_carrusel` (
+  `id`          INT NOT NULL AUTO_INCREMENT,
+  `titulo`      VARCHAR(100) DEFAULT NULL,
+  `descripcion` VARCHAR(255) DEFAULT NULL,
+  `url_imagen`  VARCHAR(255) NOT NULL,
+  `orden`       INT NOT NULL DEFAULT 0,
+  `activo`      TINYINT(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_0900_ai_ci;
+
+-- =========================================================
+-- FIN DEL SCRIPT
+-- =========================================================
