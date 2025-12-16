@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createTurno } from '../api/agendaApi'
 import { getServicios } from '../api/servicioApi'
 import LoadingSpinner from '../components/LoadingSpinner'
+import CalendarPicker from '../components/CalendarPicker'
 
 function ReservarTurno() {
     const navigate = useNavigate()
@@ -22,6 +23,16 @@ function ReservarTurno() {
         opcional: false
     })
 
+    const formatFechaLarga = (isoDate) => {
+        if (!isoDate) return ''
+        const meses = [
+            'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+            'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+        ]
+        const d = new Date(`${isoDate}T00:00:00`)
+        return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`
+    }
+
     useEffect(() => {
         cargarServicios()
     }, [])
@@ -29,7 +40,6 @@ function ReservarTurno() {
     const cargarServicios = async () => {
         try {
             const data = await getServicios()
-            // Filtrar solo servicios activos
             setServicios(data.filter(s => s.activo))
         } catch (error) {
             console.error('Error al cargar servicios:', error)
@@ -43,14 +53,6 @@ function ReservarTurno() {
         setSubmitting(true)
 
         try {
-            // TODO: Aquí se enviará la reserva al backend
-            // El backend debería:
-            // 1. Crear el registro en la tabla `agenda` con estado = 'pendiente'
-            // 2. Generar un token_confirmacion único
-            // 3. Establecer confirmacion_enviada = 0, recordatorio_enviado = 0
-            // 4. Enviar email de confirmación al cliente con el token
-            // 5. Programar el envío de recordatorio 24hs antes
-
             const servicioSeleccionado = servicios.find(
                 s => s.id === parseInt(formData.servicio_id)
             )
@@ -65,7 +67,6 @@ function ReservarTurno() {
 
             setShowConfirmacion(true)
 
-            // Resetear formulario
             setFormData({
                 dia: '',
                 hora: '',
@@ -76,7 +77,6 @@ function ReservarTurno() {
                 nota: '',
                 opcional: false
             })
-
         } catch (error) {
             console.error('Error al crear turno:', error)
             alert('Hubo un error al reservar el turno. Por favor intenta nuevamente.')
@@ -93,6 +93,10 @@ function ReservarTurno() {
         }))
     }
 
+    const handleSelectHora = (hora) => {
+        setFormData(prev => ({ ...prev, hora }))
+    }
+
     // Generar horarios disponibles (ejemplo: de 9:00 a 20:00 cada 30 min)
     const generarHorarios = () => {
         const horarios = []
@@ -103,6 +107,9 @@ function ReservarTurno() {
         horarios.push('20:00')
         return horarios
     }
+
+    // Memo para no recalcular en cada render
+    const horarios = useMemo(() => generarHorarios(), [])
 
     if (loading) {
         return <LoadingSpinner message="Cargando formulario..." />
@@ -143,7 +150,7 @@ function ReservarTurno() {
         <div className="min-h-screen py-12 px-4">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-barberia-gray rounded-lg p-8">
-                    <h1 className="text-4xl font-bold text-barberia-gold mb-2 text-center">
+                    <h1 className="text-4xl font-bold text-white mb-2 text-center">
                         Reservar Turno
                     </h1>
                     <p className="text-gray-400 text-center mb-8">
@@ -151,41 +158,92 @@ function ReservarTurno() {
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Fecha y Hora */}
+                        {/* Fecha + Horarios */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Fecha */}
                             <div>
-                                <label htmlFor="dia" className="block text-sm font-medium text-gray-300 mb-2">
+                                <label className="block text-sm font-medium text-gray-300 mb-2">
                                     Fecha *
                                 </label>
-                                <input
-                                    type="date"
-                                    id="dia"
-                                    name="dia"
-                                    required
-                                    min={new Date().toISOString().split('T')[0]}
+
+                                <CalendarPicker
                                     value={formData.dia}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-barberia-dark border border-gray-600 rounded-md text-white focus:outline-none focus:border-barberia-gold"
+                                    minDateISO={new Date().toISOString().split("T")[0]}
+                                    onChange={(iso) => setFormData(prev => ({ ...prev, dia: iso, hora: "" }))}
                                 />
+
+                                {formData.dia && (
+                                    <p className="text-sm text-gray-400 mt-2">
+                                        Seleccionaste:{' '}
+                                        <span className="text-white font-semibold">
+                                            {formatFechaLarga(formData.dia)}
+                                        </span>
+                                    </p>
+                                )}
                             </div>
 
-                            <div>
-                                <label htmlFor="hora" className="block text-sm font-medium text-gray-300 mb-2">
-                                    Hora *
-                                </label>
-                                <select
-                                    id="hora"
-                                    name="hora"
-                                    required
-                                    value={formData.hora}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-3 bg-barberia-dark border border-gray-600 rounded-md text-white focus:outline-none focus:border-barberia-gold"
-                                >
-                                    <option value="">Seleccionar hora</option>
-                                    {generarHorarios().map(h => (
-                                        <option key={h} value={h}>{h}</option>
-                                    ))}
-                                </select>
+                            {/* Horarios a la vista */}
+                            <div className="mb-6">
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className="block text-sm font-medium text-gray-300">
+                                        Horarios *
+                                    </label>
+
+                                    {formData.hora && (
+                                        <span className="text-xs px-3 py-1 rounded-full bg-barberia-dark border border-gray-600 text-gray-200">
+                                            Hora: <span className="text-white font-semibold">{formData.hora}</span>
+                                        </span>
+                                    )}
+                                </div>
+
+                                {!formData.dia ? (
+                                    <div className="h-full flex items-center justify-center rounded-md border border-gray-600 bg-barberia-dark p-6 text-center">
+                                        <p className="text-gray-400 text-sm">
+                                            Elegí una fecha para ver los horarios disponibles.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="rounded-md border border-gray-600 bg-barberia-dark p-4">
+                                        <p className="text-xs text-gray-400 mb-3">
+                                            Tocá un horario para seleccionarlo.
+                                        </p>
+
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                            {horarios.map((h) => {
+                                                const selected = formData.hora === h
+                                                return (
+                                                    <button
+                                                        key={h}
+                                                        type="button"
+                                                        onClick={() => handleSelectHora(h)}
+                                                        className={[
+                                                            "py-2 rounded-md text-sm font-semibold transition-colors border",
+                                                            selected
+                                                                ? "bg-barberia-gold text-barberia-dark border-barberia-gold"
+                                                                : "bg-barberia-gray text-white border-gray-600 hover:border-barberia-gold"
+                                                        ].join(" ")}
+                                                    >
+                                                        {h}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+
+                                        {/* Select oculto para que el form siga teniendo un input "hora" required si querés */}
+                                        <select
+                                            name="hora"
+                                            required
+                                            value={formData.hora}
+                                            onChange={handleChange}
+                                            className="hidden"
+                                        >
+                                            <option value=""></option>
+                                            {horarios.map(h => (
+                                                <option key={h} value={h}>{h}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -278,28 +336,13 @@ function ReservarTurno() {
                             />
                         </div>
 
-                        {/* Checkbox opcional */}
-                        <div className="flex items-center">
-                            <input
-                                type="checkbox"
-                                id="opcional"
-                                name="opcional"
-                                checked={formData.opcional}
-                                onChange={handleChange}
-                                className="w-4 h-4 text-barberia-gold bg-barberia-dark border-gray-600 rounded focus:ring-barberia-gold"
-                            />
-                            <label htmlFor="opcional" className="ml-2 text-sm text-gray-300">
-                                Marcar este turno como opcional (turno flexible)
-                            </label>
-                        </div>
-
                         {/* Botón de envío */}
                         <button
                             type="submit"
                             disabled={submitting}
                             className={`w-full py-4 rounded-md font-bold text-lg transition-colors ${submitting
-                                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                                    : 'bg-barberia-gold text-barberia-dark hover:bg-yellow-500'
+                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                : 'bg-white text-barberia-dark hover:text-white hover:bg-black'
                                 }`}
                         >
                             {submitting ? 'Reservando...' : 'Confirmar Reserva'}
